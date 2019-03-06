@@ -2,10 +2,11 @@
   <div>
     <div>
       <el-tree
-      v-if="show_tree"
+      lazy
       node-key="nid"
-      :data="treeNodes"
+      :data="data"
       :indent = "5"
+      :load="loadFolders"
       :props="defaultProps"
       ref="project_tree"
       @node-click="handleNodeClick">
@@ -25,8 +26,6 @@ import {ajax} from '../../api/fetch'
 import DeletePopover from './DeletePopover'
 import FolderInfoPanel from './FolderInfoPanel'
 import ModifyProject from './ModifyProject'
-import { mapState, mapActions } from 'vuex'
-import TreeNode from '../../entitys/TreeNode'
 export default {
   name: 'wa-project',
   props: ['project', 'show_modify'],
@@ -34,7 +33,6 @@ export default {
   data () {
     return {
       data: [],
-      show_tree: false,
       defaultProps: {
         children: 'children',
         label: 'label',
@@ -44,15 +42,8 @@ export default {
       filterText: ''
     }
   },
-  computed: {
-    ...mapState('EntitysContainer', ['treeNodes'])
-  },
   methods: {
-    ...mapActions('EntitysContainer', ['setTreeNodes']),
-    handleNodeClick (data, node) {
-      node.loading = true
-      this.$refs.project_tree.updateKeyChildren(data.nid, this.data)
-      console.log(node)
+    handleNodeClick (data) {
       if (data.leaf) {
         let request = {
           method: 'GET',
@@ -147,49 +138,9 @@ export default {
       const children = parent.childNodes
       const index = children.findIndex(d => d.key === data.nid)
       children.splice(index, 1)
-    },
-    fetchFirstLayerFolder () {
-      let request = {
-        method: 'GET',
-        url: 'projects/' + this.project.pid + '/content/first-layer',
-        data: {
-          ownerId: this.project.projectOwner
-        }
-      }
-      ajax(request).then(resp => {
-        // const nodeList = resp.data.data.map(item => new TreeNode(item))
-        this.setTreeNodes(resp.data.data)
-        console.log(this.treeNodes)
-        this.show_tree = true
-      }).catch(error => {
-        this.whenErrorMessage(error, () => {
-          this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
-        })
-      })
     }
   },
   created () {
-    this.fetchFirstLayerFolder()
-    // this.data = [{
-    //   id: 1,
-    //   label: '一级 1',
-    //   children: [{
-    //     id: 4,
-    //     label: '二级 1-1',
-    //     children: [{
-    //       id: 9,
-    //       label: '三级 1-1-1'
-    //     }, {
-    //       id: 10,
-    //       label: '三级 1-1-2'
-    //     }]
-    //   }]
-    // }]
-    this.data = [
-      TreeNode.nullNode('1'),
-      TreeNode.nullNode('2'),
-      TreeNode.nullNode('3')
-    ]
   }
 }
 </script>

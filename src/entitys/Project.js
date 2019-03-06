@@ -12,4 +12,15 @@ export default class Project {
   static convertToProject (str) {
     return new Project(JSON.parse(str))
   }
+
+  static newEmptyProject (str) {
+    return new Project({
+      pid: null,
+      projectName: null,
+      projectOwner: null,
+      overt: null,
+      whoJoins: null,
+      status: null
+    })
+  }
 }

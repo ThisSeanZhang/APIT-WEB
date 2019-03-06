@@ -1,17 +1,26 @@
 const state = {
-  projects: []
+  projects: [],
+  treeNodes: []
 }
 
 const mutations = {
-  FLASH_THE_INFO (state, info) {
+  FLASH_THE_PROJECTS (state, info) {
     state.projects = info
+  },
+  FLASH_THE_NODES (state, info) {
+    state.treeNodes = info
   }
 }
 
 const actions = {
   setProjects ({ commit }, projects) {
     if (projects && projects instanceof Array) {
-      commit('FLASH_THE_INFO', projects)
+      commit('FLASH_THE_PROJECTS', projects)
+    }
+  },
+  setTreeNodes ({ commit }, nodes) {
+    if (nodes && nodes instanceof Array) {
+      commit('FLASH_THE_NODES', nodes)
     }
   }
 }
