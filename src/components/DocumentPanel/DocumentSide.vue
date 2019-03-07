@@ -35,7 +35,7 @@
 </template>
 <script>
 import ProjectContainer from './ProjectContainer'
-import {ajax} from '../../api/fetch'
+import { ajax, just404 } from '../../api/fetch'
 
 import { createNamespacedHelpers } from 'vuex'
 const { mapState } = createNamespacedHelpers('UserInfo')
@@ -67,21 +67,23 @@ export default {
   methods: {
     handleNodeClick (data) {
       if (data.leaf) {
-        let request = {
-          method: 'GET',
-          url: 'projects/' + this.pid + '/apis/' + data.contain
-        }
-        ajax(request).then(resp => {
-          // TODO 获取成功后的相应操作
-          // console.log(resp.data)
-          this.$emit('get:api', resp.data)
-        }).catch(error => {
-          this.whenErrorMessage(error, () => {
-            this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
-          })
-        })
+        this.$router.push('/projects/' + this.pid + '/apis/' + data.contain)
       }
-      // console.log(data)
+      // if (data.leaf) {
+      //   let request = {
+      //     method: 'GET',
+      //     url: 'projects/' + this.pid + '/apis/' + data.contain
+      //   }
+      //   ajax(request).then(resp => {
+      //     // TODO 获取成功后的相应操作
+      //     // console.log(resp.data)
+      //     this.$emit('get:api', resp.data)
+      //   }).catch(error => {
+      //     this.whenErrorMessage(error, () => {
+      //       this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
+      //     })
+      //   })
+      // }
     },
     loadFolders (node, resolve) {
       // console.log(node)
@@ -98,28 +100,18 @@ export default {
       // console.log(this.data)
     },
     getFolders (node, container, request) {
-      // let request = {method: 'GET', url: 'http://localhost:8080/floders'}
       ajax(request).then(resp => {
-        // console.log(resp)
-        // TODO 登入成功后的相应操作
         container(resp.data.data)
       }).catch(error => {
-        this.whenErrorMessage(error, () => {
-          this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
-        })
-        node.loading = false
+        just404(error)
+          .then(resp => {
+            this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
+            node.loading = false
+          })
+          .catch(() => {
+            node.loading = false
+          })
       })
-    },
-    whenErrorMessage (error, dowhat) {
-      if (error.response) {
-        if (error.response.status === 404) {
-          dowhat()
-        }
-      } else if (error.request) {
-        this.$message.error('发送失败请检查网络连接╮（╯＿╰）╭')
-      } else {
-        this.$message('欸，好像出错了_(:з)∠)_，再试一次吧')
-      }
     },
     remove (node, data) {
       const list = data.nid.split('-')
@@ -156,7 +148,7 @@ export default {
       this.showTree = false
       setTimeout(() => {
         this.showTree = true
-      }, 500)
+      }, 1)
     },
     fetchFirstLayer (node, container) {
       this.obtionStatus = this.requestStatus.FETCHING
@@ -165,32 +157,15 @@ export default {
         this.obtionStatus = this.requestStatus.SUCCESS
         container(resp.data.data)
       }).catch(error => {
-        this.testPromise(error)
+        just404(error)
           .then(resp => {
-            if (resp.status === 404) {
-              console.log(error.request)
-              this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
-              this.obtionStatus = this.requestStatus.NOTFOUND
-            } else {
-              this.$message.warning(error.response.data.message + '(●ˇ∀ˇ●)')
-            }
+            console.log(error.request)
+            this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
+            this.obtionStatus = this.requestStatus.NOTFOUND
           })
           .catch(() => {
             this.obtionStatus = this.requestStatus.REQUEST_ERROR
           })
-      })
-    },
-    testPromise (error) {
-      return new Promise((resolve, reject) => {
-        if (error.response) {
-          resolve(error.response)
-        } else if (error.request) {
-          this.$message.error('发送失败请检查网络连接╮（╯＿╰）╭')
-          reject(error)
-        } else {
-          this.$message('欸，好像出错了_(:з)∠)_，再试一次吧')
-          reject(error)
-        }
       })
     }
   },

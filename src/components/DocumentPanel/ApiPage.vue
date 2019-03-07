@@ -1,12 +1,15 @@
 <template>
-  <div>
-    <div v-if="testRequest.aid === null">
-      点击左侧选择新的API<el-butten v-if="apiId !== null" type="text" @click.stop="fetchApiInfo()">,或者刷新</el-butten>试试
+  <div class="api_contant" v-loading="currentStatus == requestStatus.FETCHING">
+    <div class="fetching_fail" v-if="currentStatus !== requestStatus.SUCCESS">
+      点击左侧选择新的API<el-button v-if="currentAid !== null" type="text" @click.stop="fetchApiInfo()">,或者刷新</el-button>试试
     </div>
     <div v-else class="doc-api">
       <div class="doc-api-header">
         <span>{{testRequest.method}}</span>
         {{testRequest.apiName}}
+        <el-tooltip class="item" effect="dark" content="刷新" placement="left">
+          <el-button size="small" style="float: right;" type="info" icon="el-icon-refresh" circle @click.stop="fetchApiInfo()" plain></el-button>
+        </el-tooltip>
       </div>
       <div class="doc-api-title">
         API的描述信息
@@ -65,121 +68,71 @@
 </template>
 <script>
 import { ajax } from '../../api/fetch'
+import API from '../../entitys/API'
 export default {
   name: 'api-page',
-  props: ['apiId', 'projectId'],
   data () {
     return {
-      testRequest: {
-        aid: null,
-        apiName: '',
-        method: '',
-        bewrite: '',
-        url: '',
-        parameters: [],
-        headers: [],
-        body: {
-          currentChoice: {
-            label: 'none',
-            value: ''
-          },
-          formData: [],
-          rawData: ''
-        }
-      }
+      requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
+      currentStatus: null,
+      testRequest: API.newEmptyAPI(),
+      currentAid: null,
+      currentPid: null
     }
   },
   watch: {
-    apiId: function (newV, oldV) {
+    currentAid: function (newV, oldV) {
       this.fetchApiInfo()
     }
   },
   methods: {
     fetchApiInfo () {
+      this.currentStatus = this.requestStatus.FETCHING
       let request = {
         method: 'GET',
-        url: 'projects/' + this.projectId + '/apis/' + this.apiId
+        url: 'projects/' + this.currentPid + '/apis/' + this.currentAid
       }
       const h = this.$createElement
       ajax(request).then(resp => {
-        this.convertToTestRequest(resp.data.data)
+        this.currentStatus = this.requestStatus.SUCCESS
+        this.testRequest = API.convertToAPI(resp.data.data)
       }).catch(error => {
+        this.currentStatus = this.requestStatus.REQUEST_ERROR
         console.log(error)
         this.$notify({
           title: '获取相应的API信息',
           message: h('i', { style: 'color: #f56c6c' }, '失败了〒▽〒,页面上的信息可能已经失效')
         })
-        this.initTestRequest()
+        this.testRequest = API.newEmptyAPI()
       })
     },
-    convertToTestRequest (item) {
-      this.testRequest.aid = item.aid
-      this.testRequest.apiName = item.apiName
-      this.testRequest.method = item.method ? item.method : 'GET'
-      this.testRequest.bewrite = item.bewrite ? item.bewrite : ''
-      this.testRequest.url = item.url ? item.url : ''
-      this.testRequest.parameters = item.parameters
-        ? this.convertToList(item.parameters, info => { return {checked: (info[0] === 'true'), key: info[1], value: info[2], description: info[3]} })
-        : []
-      this.testRequest.headers = item.headers
-        ? this.convertToList(item.headers, info => { return {checked: (info[0] === 'true'), key: info[1], value: info[2], description: info[3]} })
-        : []
-      const body = item.body
-        ? JSON.parse(item.body)
-        : {
-          currentChoice: {
-            label: 'none',
-            value: ''
-          },
-          formData: '',
-          rawData: ''
-        }
-      this.testRequest.body.formData = body.formData
-        ? this.convertToList(body.formData, info => { return {checked: (info[0] === 'true'), key: info[1], type: info[2], value: info[3], description: info[4]} })
-        : []
-      this.testRequest.body.rawData = body.rawData ? body.rawData : ''
-      this.testRequest.body.currentChoice = body.currentChoice
-      this.testRequest.apiOwner = item.apiOwner
-      this.testRequest.belongFolder = item.belongFolder
-      this.testRequest.belongProject = item.belongProject
-    },
-    convertToList (value, doWhat) {
-      return value.split('<a_o>').map(e => {
-        // let info = e.split('<a_p>')
-        // return {checked: (info[0] === 'true'), key: info[1], value: info[2], description: info[3]}
-        return doWhat(e.split('<a_p>'))
-      })
-    },
-    initTestRequest () {
-      this.testRequest = {
-        aid: null,
-        apiName: '',
-        method: '',
-        bewrite: '',
-        url: '',
-        parameters: [],
-        headers: [],
-        body: {
-          currentChoice: {
-            label: 'none',
-            value: ''
-          },
-          formData: [],
-          rawData: ''
-        }
+    checkRouteValue (key) {
+      console.log('key' + key)
+      if (key === null || key === undefined || isNaN(key)) {
+        this.$message.warning('访问的地址错误(●ˇ∀ˇ●),自动回到之前的页面啦')
+        this.$router.go(-1)
       }
+      return parseInt(key)
     }
   },
   created () {
-    console.log(this.apiId)
-    if (this.apiId !== null) {
-      this.fetchApiInfo()
-    }
+    this.currentPid = this.checkRouteValue(this.$route.params.pid)
+    this.currentAid = this.checkRouteValue(this.$route.params.aid)
   },
   activated () {
-    if (this.apiId !== null) {
-      this.fetchApiInfo()
-    }
+    console.log('dddd')
+  },
+  beforeRouteUpdate (to, from, next) {
+    // const opid = this.checkRouteValue(from.params.pid)
+    this.currentPid = this.checkRouteValue(to.params.pid)
+    this.currentAid = this.checkRouteValue(to.params.aid)
+    console.log(this.currentAid)
+    // next(this.currentPid === opid ? true : '/projects/' + this.currentPid)
+    next()
+  },
+  beforeRouteEnter (to, from, next) {
+    console.log('cccc')
+    next()
   }
 }
 </script>
@@ -190,7 +143,7 @@ export default {
     font-size: 20px;
     font-weight: 900;
     border-bottom: 1px solid #dcdfe6;
-    margin: 13px 0px 20px 0px;
+    padding: 13px 0px 20px 0px;
   }
   .doc-api-title{
     font-size: 18px;
@@ -208,5 +161,15 @@ export default {
   .doc-api-table{
     border-radius: 4px;
   }
+}
+.api_contant{
+  height: 100%;
+}
+.fetching_fail {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

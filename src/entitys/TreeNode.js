@@ -22,21 +22,7 @@ export default class TreeNode {
       parentId: '',
       ownerId: '1',
       belongProject: '1',
-      children: [{
-        id: 1,
-        label: '一级 1',
-        children: [{
-          id: 4,
-          label: '二级 1-1',
-          children: [{
-            id: 9,
-            label: '三级 1-1-1'
-          }, {
-            id: 10,
-            label: '三级 1-1-2'
-          }]
-        }]
-      }]
+      children: []
     })
   }
 }

@@ -30,9 +30,7 @@ export default new Router({
       component: DocumentPage,
       children: [
         {
-          // 当 /user/:id/posts 匹配成功
-          // UserPosts 会被渲染在 User 的 <router-view> 中
-          path: '/aid/:aid',
+          path: 'apis/:aid',
           component: ApiPage
         }
       ]

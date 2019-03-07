@@ -38,12 +38,12 @@ export default {
     return {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       currentStatus: null,
-      currentProjectId: null,
+      currentPid: null,
       currentProject: null
     }
   },
   watch: {
-    currentProjectId: function (nv, ov) {
+    currentPid: function (nv, ov) {
       this.fetchProject()
     }
   },
@@ -53,7 +53,7 @@ export default {
       this.currentStatus = this.requestStatus.FETCHING
       let request = {
         method: 'GET',
-        url: 'projects/' + this.currentProjectId
+        url: 'projects/' + this.currentPid
       }
       ajax(request).then(resp => {
         this.currentProject = new Project(resp.data.data)
@@ -81,11 +81,11 @@ export default {
       }
     },
     setCurrentPid (pid) {
-      this.currentStatus = this.requestStatus.FETCHING
+      // this.currentStatus = this.requestStatus.FETCHING
       if (pid && !isNaN(pid)) {
-        if (parseInt(pid) === this.currentProjectId) this.currentStatus = this.requestStatus.SUCCESS
-        this.currentProjectId = parseInt(pid)
-        console.log(this.currentProjectId)
+        // if (parseInt(pid) === this.currentPid) this.currentStatus = this.requestStatus.SUCCESS
+        this.currentPid = parseInt(pid)
+        console.log(this.currentPid)
       } else {
         // this.$router.replace('/index')
         this.$message.warning('访问的地址错误(●ˇ∀ˇ●),自动回到之前的页面啦')

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { Message } from 'element-ui'
 
 let TIME_OUT_MAX = 5000
 
@@ -24,6 +25,53 @@ let ajax = (option = {url: '', data: {}, isSilence: false, method: 'GET'}) => {
       })
   })
 }
+const handleNotHTTPError = function (error, reject) {
+  if (error.request) {
+    Message.error('发送失败请检查网络连接╮（╯＿╰）╭')
+    reject(error)
+  } else {
+    Message('欸，好像出错了_(:з)∠)_，再试一次吧')
+    reject(error)
+  }
+}
+const handleAll = function (error) {
+  return new Promise((resolve, reject) => {
+    if (error.response) {
+      switch (parseInt(error.response.status)) {
+        case 504:
+          Message.error('发送失败请检查网络连接╮（╯＿╰）╭')
+          reject(error)
+          break
+      }
+      resolve(error.response)
+    } else {
+      handleNotHTTPError(error, reject)
+    }
+  })
+}
+const just404 = function (error) {
+  return new Promise((resolve, reject) => {
+    if (error.response) {
+      switch (parseInt(error.response.status)) {
+        case 404:
+          resolve(error)
+          break
+        case 504:
+          Message.error('发送失败请检查网络连接╮（╯＿╰）╭')
+          reject(error)
+          break
+        default:
+          Message.warning(error.response.data.message + '(●ˇ∀ˇ●)')
+          reject(error)
+      }
+    } else {
+      handleNotHTTPError(error, reject)
+    }
+  })
+}
+
 export {
-  ajax
+  ajax,
+  handleAll,
+  just404
 }
