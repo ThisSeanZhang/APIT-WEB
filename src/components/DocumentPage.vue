@@ -79,19 +79,25 @@ export default {
         this.$message('欸，好像出错了_(:з)∠)_，再试一次吧')
         this.currentStatus = this.requestStatus.REQUEST_ERROR
       }
+    },
+    setCurrentPid (pid) {
+      this.currentStatus = this.requestStatus.FETCHING
+      if (pid && !isNaN(pid)) {
+        if (parseInt(pid) === this.currentProjectId) this.currentStatus = this.requestStatus.SUCCESS
+        this.currentProjectId = parseInt(pid)
+        console.log(this.currentProjectId)
+      } else {
+        // this.$router.replace('/index')
+        this.$message.warning('访问的地址错误(●ˇ∀ˇ●),自动回到之前的页面啦')
+        this.$router.go(-1)
+      }
     }
   },
   created () {
-    const pid = this.$route.params.pid
-    this.currentStatus = this.requestStatus.FETCHING
-    if (pid) {
-      this.currentProjectId = parseInt(pid)
-    } else {
-      this.$router.go(-1)
-    }
+    this.setCurrentPid(this.$route.params.pid)
   },
   beforeRouteUpdate (to, from, next) {
-    this.currentProjectId = parseInt(to.params.pid)
+    this.setCurrentPid(to.params.pid)
     // console.log(to, from, next)
     next()
   }
