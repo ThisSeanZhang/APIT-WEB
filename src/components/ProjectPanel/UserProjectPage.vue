@@ -7,7 +7,8 @@
     </wa-header>
   </el-header>
   <el-main>
-    <!-- <div
+    <project-panel></project-panel>
+    <div
       class="fetching_fail"
       v-if="currentStatus !== requestStatus.SUCCESS"
       v-loading="currentStatus === requestStatus.FETCHING"
@@ -18,8 +19,8 @@
       <div v-else-if="currentStatus === requestStatus.REQUEST_ERROR">
         请求失败了_(:з)∠)_,<el-button @click.stop="fetchDeveloperProject" type="text">再试试</el-button>吧
       </div>
-    </div> -->
-    <!-- <div class="projects-warp" v-else>
+    </div>
+    <div class="projects-warp" v-else>
       <div class="project-container">
         <el-card class="project-card"
           shadow="hover"
@@ -29,15 +30,15 @@
           </div>
         </el-card>
       </div>
-    </div> -->
+    </div>
   </el-main>
 </el-container>
 </template>
 <script>
-import { ajax, just404 } from '../api/fetch'
-import WaHeader from './Header'
+import { ajax, just404 } from '../../api/fetch'
+import WaHeader from '../Header'
 export default {
-  name: 'user-page',
+  name: 'user-project-page',
   components: {WaHeader},
   data () {
     return {
@@ -94,13 +95,13 @@ export default {
     }
   },
   created () {
-    // this.setCurrentDid(this.$route.params.did)
-    // // this.fetchDeveloperProject()
+    this.setCurrentDid(this.$route.params.did)
+    // this.fetchDeveloperProject()
   },
   beforeRouteUpdate (to, from, next) {
-    // this.setCurrentDid(to.params.did)
-    // // console.log(to, from, next)
-    // next()
+    this.setCurrentDid(to.params.did)
+    // console.log(to, from, next)
+    next()
   }
 }
 </script>
@@ -116,60 +117,60 @@ export default {
   color: #333;
   height: 100%;
   padding: 0px;
-  // height: 92%;/*写给不支持calc()的浏览器*/
-  // height:-moz-calc(100% - 60px);
-  // height:-webkit-calc(100% - 60px);
-  // height: calc(100% - 60px);
+  height: 92%;/*写给不支持calc()的浏览器*/
+  height:-moz-calc(100% - 60px);
+  height:-webkit-calc(100% - 60px);
+  height: calc(100% - 60px);
 }
-// .projects-warp{
-//   margin-top: 100px;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-// }
-// .project-container {
-//   width: 600px;
-//   display: inline-flex;
-//   flex-wrap: wrap;
-//   .project-card{
-//     // width: 32.3%;
-//     // min-width: 350px;
-//     width: 190px;
-//     height: 117px;
-//     margin: 5px;
-//     cursor: pointer;
-//   }
-// }
-// .card-container {
-//   height: 117px;
-//   padding: 10px 14px 14px 14px;
-//   i{
-//     display: none;
-//     float: right;
-//   }
-//   i:hover{
-//     display: none;
-//     float: right;
-//     color: #66b1ff;
-//   }
-//   .card-text {
-//     // height: 100%;
-//     margin-top: 20px;
-//     text-align: center;
-//   }
-// }
-// .card-container:hover i {
-//   display: inline-block;
-// }
-// .fetching_fail_not_found{
-//   color: #f56c6c;
-//   font-size: 20px;
-// }
-// .fetching_fail {
-//   height: 100%;
-//   width: 100%;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-// }
+.projects-warp{
+  margin-top: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.project-container {
+  width: 600px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  .project-card{
+    // width: 32.3%;
+    // min-width: 350px;
+    width: 190px;
+    height: 117px;
+    margin: 5px;
+    cursor: pointer;
+  }
+}
+.card-container {
+  height: 117px;
+  padding: 10px 14px 14px 14px;
+  i{
+    display: none;
+    float: right;
+  }
+  i:hover{
+    display: none;
+    float: right;
+    color: #66b1ff;
+  }
+  .card-text {
+    // height: 100%;
+    margin-top: 20px;
+    text-align: center;
+  }
+}
+.card-container:hover i {
+  display: inline-block;
+}
+.fetching_fail_not_found{
+  color: #f56c6c;
+  font-size: 20px;
+}
+.fetching_fail {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>
