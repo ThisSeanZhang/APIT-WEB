@@ -4,6 +4,7 @@ const state = {
   email: null,
   defaultProject: null,
   defaultFolder: null,
+  admin: false,
   signed: false
 }
 
@@ -15,6 +16,13 @@ const mutations = {
     state.defaultProject = info.defaultProject
     state.defaultFolder = info.defaultFolder
     state.signed = info.signed
+    state.admin = info.admin
+    // 存入浏览器
+    if (info.developerId === null) {
+      sessionStorage.removeItem('developerId')
+    } else {
+      sessionStorage.developerId = info.developerId
+    }
   }
 }
 

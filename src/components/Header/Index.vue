@@ -6,28 +6,40 @@
         <!-- <i @click.stop="goTo('/index')" class="el-icon-d-arrow-left"></i>
         <i @click.stop="goTo('/user-page')" class="el-icon-arrow-left"></i> -->
         <el-button-group>
-          <el-button type="info" size="small" @click.stop="goTo('/index')"  plain >主页</el-button>
-          <el-button type="info" size="small" @click.stop="goTo('/user-page')" plain icon="el-icon-d-arrow-left">个人</el-button>
+          <el-button v-if="showButton.index" type="info" size="small" @click.stop="goTo('/index')"  plain >主页</el-button>
+          <el-button v-if="showButton.develop && signed" type="info" size="small" @click.stop="goTo('/developers/' + developerId)" plain icon="el-icon-d-arrow-left">个人</el-button>
           <!-- <el-button type="info" size="small" plain icon="el-icon-arrow-left">团队</el-button> -->
-          <el-button type="info" size="small" @click.stop="goTo('/admin')" plain icon="el-icon-delete">管理员</el-button>
+          <el-button v-if="admin && signed && btn !== 'admin' " type="info" size="small" @click.stop="goTo('/admin')" plain>管理员</el-button>
         </el-button-group>
       </div>
     </el-col>
     <el-col :span="12">
-      <div class="doc-title">{{title}}</div>
+      <div class="doc-title">{{inputTitle}}</div>
     </el-col>
-    <el-col :span="4"><info-panel v-bind:message="'点击展示/修改用户信息'" v-on:click:name="openUserInfoPanel" ></info-panel></el-col>
+    <el-col :span="4">
+      <info-panel
+        v-bind:message="'点击展示/修改用户信息'"
+        v-on:click:name="openUserInfoPanel"
+        v-on:login:success="$emit('login:success')">
+      </info-panel>
+    </el-col>
   </el-row>
 </template>
 <script>
-import InfoPanel from '../UserPanel/InfoPanel'
-import Project from '../../entitys/Project'
+import InfoPanel from './InfoPanel'
+import { createNamespacedHelpers } from 'vuex'
+const { mapState } = createNamespacedHelpers('UserInfo')
 export default {
   name: 'document-panel-header',
   components: {InfoPanel},
   props: {
-    project: {
-      type: Project
+    inputTitle: {
+      type: String,
+      default: ''
+    },
+    btn: {
+      type: String,
+      default: 'default'
     }
   },
   data () {
@@ -35,9 +47,17 @@ export default {
     }
   },
   computed: {
-    title: function () {
-      return this.project ? this.project.projectName : ''
-    }
+    showButton: function () {
+      var setting = {
+        'default': {index: true, develop: false},
+        'index': {index: false, develop: true},
+        'developer': {index: true, develop: false},
+        'project': {index: true, develop: true},
+        'admin': {index: true, develop: true}
+      }
+      return setting[this.btn]
+    },
+    ...mapState(['admin', 'developerId', 'signed'])
   },
   methods: {
     openUserInfoPanel (target) {

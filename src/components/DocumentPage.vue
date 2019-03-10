@@ -1,7 +1,11 @@
 <template>
 <el-container>
   <el-header>
-    <document-panel-header v-bind:project="currentProject"></document-panel-header>
+    <wa-header
+      v-bind:inputTitle="headerTitle"
+      v-bind:btn="'project'"
+      v-on:login:success="fetchProject">
+    </wa-header>
   </el-header>
   <el-container
     v-loading="currentStatus === requestStatus.FETCHING"
@@ -29,11 +33,11 @@
 <script>
 import {ajax} from '../api/fetch'
 import DocumentSide from './DocumentPanel/DocumentSide'
-import DocumentPanelHeader from './DocumentPanel/DocumentPanelHeader'
+import WaHeader from './Header'
 import Project from '../entitys/Project'
 export default {
   name: 'document-page',
-  components: {DocumentSide, DocumentPanelHeader},
+  components: {DocumentSide, WaHeader},
   data () {
     return {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
@@ -47,7 +51,11 @@ export default {
       this.fetchProject()
     }
   },
-  computed: {},
+  computed: {
+    headerTitle: function () {
+      return this.currentProject === null ? '' : this.currentProject.projectName
+    }
+  },
   methods: {
     fetchProject () {
       this.currentStatus = this.requestStatus.FETCHING

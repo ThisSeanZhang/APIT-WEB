@@ -5,6 +5,7 @@ import MainPage from '@/components/MainPage'
 import UserPage from '@/components/UserPage'
 import DocumentPage from '@/components/DocumentPage'
 import ApiPage from '@/components/DocumentPanel/ApiPage'
+import AdminPage from '@/components/AdminPage'
 Vue.use(Router)
 
 export default new Router({
@@ -20,7 +21,7 @@ export default new Router({
       component: MainPage
     },
     {
-      path: '/user-page',
+      path: '/developers/:did',
       name: 'user-page',
       component: UserPage
     },
@@ -31,9 +32,15 @@ export default new Router({
       children: [
         {
           path: 'apis/:aid',
+          name: 'api-page',
           component: ApiPage
         }
       ]
+    },
+    {
+      path: '/admin',
+      name: 'admin-page',
+      component: AdminPage
     }
   ]
 })

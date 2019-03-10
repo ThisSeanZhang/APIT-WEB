@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <el-main>
-      <account-main v-on:login:success="loginSuccess" ></account-main>
+      <account-main v-on:login:success="loginSuccess($event)" ></account-main>
     </el-main>
   </el-container>
 </template>
@@ -11,8 +11,8 @@ export default {
   name: 'account-page',
   components: {AccountMain},
   methods: {
-    loginSuccess () {
-      this.$router.push('/user-page')
+    loginSuccess (did) {
+      this.$router.push('/developers/' + did)
     }
   }
 }

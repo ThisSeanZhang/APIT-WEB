@@ -1,10 +1,25 @@
 <template>
 <el-container>
   <el-header>
-    <user-panel-header></user-panel-header>
+    <wa-header
+      v-bind:btn="'developer'"
+      v-on:login:success="fetchDeveloperProject">
+    </wa-header>
   </el-header>
   <el-main>
-    <div class="projects-warp">
+    <div
+      class="fetching_fail"
+      v-if="currentStatus !== requestStatus.SUCCESS"
+      v-loading="currentStatus === requestStatus.FETCHING"
+    >
+      <div class="fetching_fail_not_found" v-if="currentStatus === requestStatus.NOTFOUND">
+        找不到了呢╮（╯＿╰）╭,<el-button @click.stop="fetchDeveloperProject" type="text">创建</el-button>个项目吧
+      </div>
+      <div v-else-if="currentStatus === requestStatus.REQUEST_ERROR">
+        请求失败了_(:з)∠)_,<el-button @click.stop="fetchDeveloperProject" type="text">再试试</el-button>吧
+      </div>
+    </div>
+    <div class="projects-warp" v-else>
       <div class="project-container">
         <el-card class="project-card"
           shadow="hover"
@@ -19,33 +34,44 @@
 </el-container>
 </template>
 <script>
-import {ajax} from '../api/fetch'
-import { Loading } from 'element-ui'
-import UserPanelHeader from './UserPanel/UserPanelHeader'
-import { mapState, mapActions } from 'vuex'
-// import { mapState } from 'vuex'
+import { ajax, just404 } from '../api/fetch'
+import WaHeader from './Header'
 export default {
   name: 'user-page',
-  components: {UserPanelHeader},
+  components: {WaHeader},
+  data () {
+    return {
+      requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
+      currentStatus: null,
+      currentDid: null,
+      projects: null
+    }
+  },
+  watch: {
+    currentDid: function (nv, ov) {
+      this.fetchDeveloperProject()
+    }
+  },
   methods: {
-    ...mapActions('EntitysContainer', ['setProjects']),
     fetchDeveloperProject () {
-      let loding = Loading.service({
-        lock: true,
-        text: 'Loading',
-        background: 'rgba(255, 255, 255, 0.6)'
-      })
+      this.currentStatus = this.requestStatus.FETCHING
       let request = {
         method: 'GET',
-        url: 'developers/' + this.developerId + '/projects'
+        url: 'developers/' + this.currentDid + '/projects'
       }
       ajax(request).then(resp => {
         console.log(resp.data.data)
-        this.setProjects(resp.data.data)
-        loding.close()
+        this.projects = resp.data.data
+        this.currentStatus = this.requestStatus.SUCCESS
       }).catch(error => {
-        this.whenErrorMessage(error, this.sendRegisterInfo, true)
-        loding.close()
+        just404(error)
+          .then(resp => {
+            this.currentStatus = this.requestStatus.NOTFOUND
+          })
+          .catch(error => {
+            console.log(error)
+            this.currentStatus = this.requestStatus.REQUEST_ERROR
+          })
       })
     },
     browseProject (pid) {
@@ -55,31 +81,26 @@ export default {
     modifyProject (pid) {
       console.log('修改项目的具体信息' + pid)
     },
-    whenErrorMessage (error, dowhat, isSlience = false) {
-      if (error.response) {
-        if (error.response.status === 404) {
-          dowhat()
-        }
-        if (!isSlience) {
-          this.$message('欸，好像出错了_(:з)∠)_，再试一次吧')
-        }
-      } else if (error.request) {
-        this.$message.error('发送失败请检查网络连接╮（╯＿╰）╭')
+    setCurrentDid (did) {
+      if (did && !isNaN(did)) {
+        // if (parseInt(did) === this.currentPid) this.currentStatus = this.requestStatus.SUCCESS
+        this.currentDid = parseInt(did)
+        console.log(this.currentDid)
       } else {
-        this.$message('欸，好像出错了_(:з)∠)_，再试一次吧')
+        // this.$router.replace('/index')
+        this.$message.warning('访问的地址错误(●ˇ∀ˇ●),自动回到之前的页面啦')
+        // this.$router.go(-1)
       }
     }
   },
-  computed: {
-    ...mapState('UserInfo', ['signed', 'developerId']),
-    ...mapState('EntitysContainer', ['projects'])
-  },
   created () {
-    console.log(this.signed)
-    this.fetchDeveloperProject()
-    // if (this.signed === null || this.signed === undefined || this.signed === false) {
-    //   this.$router.push('/')
-    // }
+    this.setCurrentDid(this.$route.params.did)
+    // this.fetchDeveloperProject()
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.setCurrentDid(to.params.did)
+    // console.log(to, from, next)
+    next()
   }
 }
 </script>
@@ -137,5 +158,16 @@ export default {
 }
 .card-container:hover i {
   display: inline-block;
+}
+.fetching_fail_not_found{
+  color: #f56c6c;
+  font-size: 20px;
+}
+.fetching_fail {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

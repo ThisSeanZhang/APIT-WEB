@@ -6,7 +6,7 @@
     </div>
     <transition name="fade" >
       <keep-alive>
-      <developer-sign-in v-on:login:success="loginSuccess" class="input_box" v-if="readyLogin" ></developer-sign-in>
+      <developer-sign-in v-on:login:success="loginSuccess($event)" class="input_box" v-if="readyLogin" ></developer-sign-in>
       <developer-register class="input_box" v-else v-model="readyLogin" ></developer-register>
       </keep-alive>
     </transition>
@@ -28,8 +28,8 @@ export default {
     changePanel (target) {
       this.readyLogin = target === 'login'
     },
-    loginSuccess () {
-      this.$emit('login:success')
+    loginSuccess (did) {
+      this.$emit('login:success', did)
     }
   }
 }
