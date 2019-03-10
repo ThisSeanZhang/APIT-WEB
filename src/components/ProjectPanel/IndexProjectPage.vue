@@ -17,7 +17,7 @@
       <el-card class="project-card"
         shadow="hover"
         v-for="project in projects" :key="project.pid" :body-style="{ padding: '0px' }">
-        <div @click.stop="browseProject(project.pid)" class="card-container"><i @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
+        <div @click.stop="browseProject(project.pid)" class="card-container"><i v-if="false" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
           <div class="card-text">{{project.projectName}}</div>
         </div>
       </el-card>
@@ -68,9 +68,9 @@ export default {
       console.log('打开项目详情面板' + pid)
       this.$router.push('/projects/' + pid)
     },
-    modifyProject (pid) {
-      console.log('修改项目的具体信息' + pid)
-    },
+    // modifyProject (pid) {
+    //   console.log('修改项目的具体信息' + pid)
+    // },
     setCurrentDid (did) {
       if (did && !isNaN(did)) {
         // if (parseInt(did) === this.currentPid) this.currentStatus = this.requestStatus.SUCCESS

@@ -25,7 +25,8 @@
         <el-card class="project-card"
           shadow="hover"
           v-for="project in projects" :key="project.pid" :body-style="{ padding: '0px' }">
-          <div @click.stop="browseProject(project.pid)" class="card-container"><i @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
+          <div @click.stop="browseProject(project.pid)" class="card-container">
+            <i v-if="developerId === project.projectOwner" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
             <div class="card-text">{{project.projectName}}</div>
           </div>
         </el-card>
@@ -37,6 +38,8 @@
 <script>
 import { ajax, just404 } from '../../api/fetch'
 import WaHeader from '../Header'
+import { createNamespacedHelpers } from 'vuex'
+const { mapState } = createNamespacedHelpers('UserInfo')
 export default {
   name: 'user-project-page',
   components: {WaHeader},
@@ -47,6 +50,9 @@ export default {
       currentDid: null,
       projects: null
     }
+  },
+  computed: {
+    ...mapState(['developerId'])
   },
   watch: {
     currentDid: function (nv, ov) {
