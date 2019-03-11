@@ -7,7 +7,6 @@
     </wa-header>
   </el-header>
   <el-main>
-    <project-panel></project-panel>
     <div
       class="fetching_fail"
       v-if="currentStatus !== requestStatus.SUCCESS"
@@ -23,6 +22,14 @@
     <div class="projects-warp" v-else>
       <div class="project-container">
         <el-card class="project-card"
+          shadow="hover" :body-style="{ padding: '0px' }">
+          <div @click.stop="modifyProject(null)" class="card-container">
+            <div class="add-project-i">
+              <i class="el-icon-plus"></i>
+            </div>
+          </div>
+        </el-card>
+        <el-card class="project-card"
           shadow="hover"
           v-for="project in projects" :key="project.pid" :body-style="{ padding: '0px' }">
           <div @click.stop="browseProject(project.pid)" class="card-container">
@@ -33,22 +40,31 @@
       </div>
     </div>
   </el-main>
+  <modify-project
+    v-if="modifyVisible"
+    v-bind:pid="focusPid"
+    v-model="modifyVisible"
+    v-on:flash:projects="fetchDeveloperProject">
+  </modify-project>
 </el-container>
 </template>
 <script>
 import { ajax, just404 } from '../../api/fetch'
+import ModifyProject from './ModifyProject'
 import WaHeader from '../Header'
 import { createNamespacedHelpers } from 'vuex'
 const { mapState } = createNamespacedHelpers('UserInfo')
 export default {
   name: 'user-project-page',
-  components: {WaHeader},
+  components: {WaHeader, ModifyProject},
   data () {
     return {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       currentStatus: null,
       currentDid: null,
-      projects: null
+      projects: null,
+      modifyVisible: false,
+      focusPid: null
     }
   },
   computed: {
@@ -86,7 +102,8 @@ export default {
       this.$router.push('/projects/' + pid)
     },
     modifyProject (pid) {
-      console.log('修改项目的具体信息' + pid)
+      this.focusPid = pid
+      this.modifyVisible = true
     },
     setCurrentDid (did) {
       if (did && !isNaN(did)) {
@@ -155,7 +172,7 @@ export default {
     float: right;
   }
   i:hover{
-    display: none;
+    display: block;
     float: right;
     color: #66b1ff;
   }
@@ -164,6 +181,23 @@ export default {
     margin-top: 20px;
     text-align: center;
   }
+  .add-project-i{
+    height: 100%;
+    display:  flex;
+    justify-content:  center;
+    align-items: center;
+    i {
+      display: inline-block;
+      font-size: 30px;
+      font-weight: 900;
+      color: #909399;
+    }
+  }
+  .add-project-i:hover{
+      i {
+        color: #303133;
+      }
+    }
 }
 .card-container:hover i {
   display: inline-block;

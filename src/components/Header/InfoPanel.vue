@@ -2,7 +2,7 @@
   <div>
     <div class="info-panel" v-if="signed" >
       <el-tooltip class="item" effect="dark" :content="message" placement="top">
-        <div class="name-info" style="cursor: pointer;" @click.stop="clickName">ccc{{developerName}}</div>
+        <div class="name-info" style="cursor: pointer;" @click.stop="clickName">{{developerName}}</div>
       </el-tooltip>
       <el-button @click="logOut" type="info" >
         退出<i class="el-icon-d-arrow-right"></i>

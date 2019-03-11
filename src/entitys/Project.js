@@ -1,4 +1,5 @@
 import { ajax } from '../api/fetch'
+const projectNamePatten = /^[\u4e00-\u9fa5a-zA-Z_\-0-9=]{4,8}$/
 export default class Project {
   constructor (project) {
     this.pid = project.pid
@@ -33,5 +34,15 @@ export default class Project {
       url: '/admin/projects',
       data: filter
     })
+  }
+
+  static nameValid () {
+    return {
+      patten: projectNamePatten,
+      message: '长度在 4 到 8 个字符,且仅能出现字符\'-_\''
+    }
+  }
+  isLegalName () {
+    return projectNamePatten.test(this.projectName)
   }
 }

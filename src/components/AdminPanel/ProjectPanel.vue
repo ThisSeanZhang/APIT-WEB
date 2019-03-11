@@ -82,6 +82,7 @@ export default {
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
       this.filter.size = val
+      this.filter.page = 0
       this.fetchProject()
     },
     handleCurrentChange (val) {

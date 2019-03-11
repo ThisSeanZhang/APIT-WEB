@@ -13,10 +13,10 @@
         </el-button-group>
       </div>
     </el-col>
-    <el-col :span="12">
+    <el-col :span="9">
       <div class="doc-title">{{inputTitle}}</div>
     </el-col>
-    <el-col :span="4">
+    <el-col :span="7">
       <info-panel
         v-bind:message="'点击展示/修改用户信息'"
         v-on:click:name="openUserInfoPanel"

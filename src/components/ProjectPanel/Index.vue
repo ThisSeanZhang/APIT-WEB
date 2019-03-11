@@ -12,23 +12,48 @@
       请求失败了_(:з)∠)_,<el-button @click.stop="fetchDeveloperProject" type="text">再试试</el-button>吧
     </div>
   </div>
-  <div class="projects-warp">
+  <div class="projects-warp" v-else>
     <div class="project-container">
       <el-card class="project-card"
         shadow="hover"
         v-for="project in projects" :key="project.pid" :body-style="{ padding: '0px' }">
-        <div @click.stop="browseProject(project.pid)" class="card-container"><i v-if="false" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
+        <div @click.stop="browseProject(project.pid)" class="card-container">
+          <i
+            v-if="developerId === project.projectOwner"
+            @click.stop="modifyProject(project.pid)"
+            class="el-icon-setting"></i>
           <div class="card-text">{{project.projectName}}</div>
         </div>
       </el-card>
     </div>
   </div>
+  <div class="page-block" v-if="currentStatus === requestStatus.SUCCESS">
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="filter.page + 1"
+      :page-sizes="[9, 12, 15]"
+      :page-size="filter.size"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="filter.total">
+    </el-pagination>
+    <modify-project
+      v-if="modifyVisible"
+      v-bind:pid="focusPid"
+      v-model="modifyVisible"
+      v-on:flash:projects="fetchDeveloperProject"></modify-project>
+  </div>
 </div>
 </template>
 <script>
+import ModifyProject from './ModifyProject'
 import { ajax, just404 } from '../../api/fetch'
+import Project from '../../entitys/Project'
+import { createNamespacedHelpers } from 'vuex'
+const { mapState } = createNamespacedHelpers('UserInfo')
 export default {
   name: 'project-panel',
+  components: {ModifyProject},
   props: {
     url: {
       type: String,
@@ -39,12 +64,40 @@ export default {
     return {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       currentStatus: null,
-      projects: null
+      projects: null,
+      filter: {
+        page: 0,
+        size: 9,
+        total: 0
+      },
+      focusPid: null,
+      modifyVisible: false
     }
+  },
+  computed: {
+    ...mapState(['developerId'])
   },
   watch: {
   },
   methods: {
+    modifyProject (pid) {
+      this.focusPid = pid
+      this.modifyVisible = true
+    },
+    handleSizeChange (val) {
+      console.log(`每页 ${val} 条`)
+      this.filter.size = val
+      this.filter.page = 0
+      this.fetchDeveloperProject()
+    },
+    handleCurrentChange (val) {
+      console.log(`当前页: ${val}`)
+      this.filter.page = val - 1
+      this.fetchDeveloperProject()
+    },
+    handleSelectionChange (val) {
+      this.currentSelect = val
+    },
     fetchDeveloperProject () {
       if (this.url === null) {
         return
@@ -52,11 +105,15 @@ export default {
       this.currentStatus = this.requestStatus.FETCHING
       let request = {
         method: 'GET',
-        url: this.url
+        url: this.url,
+        data: this.filter
       }
       ajax(request).then(resp => {
         console.log(resp.data.data)
-        this.projects = resp.data.data
+        this.filter.page = resp.data.data.number
+        this.filter.size = resp.data.data.size
+        this.filter.total = resp.data.data.totalElements
+        this.projects = resp.data.data.content.map(p => new Project(p))
         this.currentStatus = this.requestStatus.SUCCESS
       }).catch(error => {
         just404(error)
@@ -83,6 +140,11 @@ export default {
 }
 </script>
 <style lang="scss" type="text/css" scoped>
+.page-block{
+  display: flex;
+  padding: 20px;
+  justify-content: center;
+}
 .developer-projects{
   height: 100%;
   // height: 92%;/*写给不支持calc()的浏览器*/
