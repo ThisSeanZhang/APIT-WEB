@@ -65,7 +65,7 @@
         :visible.sync="delDialogVisible"
         append-to-body>
         <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button @click="delDialogVisible = false">取 消</el-button>
         <el-button
           type="danger"
           @click="delProject">确 定</el-button>

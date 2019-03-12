@@ -1,6 +1,6 @@
 <template>
   <div class="select-location" v-loading="obtionStatus === requestStatus.FETCHING">
-    <el-button v-if="projects.length === 0" type="text" @click.stop="findAllProjectByDeveloperId">重新获取</el-button>
+    <!-- <el-button v-if="projects.length === 0" type="text" @click.stop="findAllProjectByDeveloperId">重新获取</el-button>
     <el-collapse  v-model="activeName" accordion>
       <el-collapse-item
         v-for="project in projects"
@@ -9,12 +9,35 @@
         :name="project.pid.toString()">
         <select-folder v-on:select:folder="emitCurrentChioce(project.pid, $event)" v-if="activeName === project.pid.toString()" v-bind:project="project"></select-folder>
       </el-collapse-item>
-    </el-collapse>
+    </el-collapse> -->
+    <div class="select-project">
+      <dir
+        v-for="project in projects"
+        :key="project.pid"
+        class="wa_project"
+        :style="project.pid === currentSelect.pid ? 'background-color: #e4e4e4;' : ''"
+        @click.stop="emitCurrentChioce({pid: project.pid, fid: null})"
+      >
+        <span class="project_title">{{project.projectName}}</span>
+        <span class="edit" v-if="project.pid === currentSelect.pid">
+          <i class="el-icon-arrow-right"></i>
+        </span>
+      </dir>
+    </div>
+    <div class="select-folder">
+      <select-folder
+        ref="select_folder"
+        v-bind:pid="currentSelect.pid"
+        v-bind:show_modify="true"
+        v-on:select:target = "emitCurrentChioce($event)"
+      ></select-folder>
+    </div>
   </div>
 </template>
 
 <script>
 import {ajax} from '../../api/fetch'
+import Project from '../../entitys/Project'
 import SelectFolder from './SelectFolder'
 import { createNamespacedHelpers } from 'vuex'
 const { mapState } = createNamespacedHelpers('UserInfo')
@@ -23,10 +46,15 @@ export default {
   components: {SelectFolder},
   data () {
     return {
+      show_modify: false,
       activeName: null,
       projects: [],
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
-      obtionStatus: null
+      obtionStatus: null,
+      currentSelect: {
+        pid: null,
+        fid: null
+      }
     }
   },
   methods: {
@@ -39,10 +67,7 @@ export default {
       let request = {method: 'GET', url: 'projects/owner/' + this.developerId}
       this.obtionStatus = this.requestStatus.FETCHING
       ajax(request).then(resp => {
-        console.log(resp)
-        // TODO 登入成功后的相应操作
-        this.projects = resp.data.data
-        // this.activeName = this.projects[0].pid.toString()
+        this.projects = resp.data.data.map(p => new Project(p))
         this.obtionStatus = this.requestStatus.SUCCESS
       }).catch(error => {
         this.whenErrorMessage(error, () => {
@@ -64,8 +89,9 @@ export default {
         this.obtionStatus = this.requestStatus.REQUEST_ERROR
       }
     },
-    emitCurrentChioce (pid, fid) {
-      this.$emit('select:target', {pid: pid, fid: fid})
+    emitCurrentChioce (target) {
+      this.currentSelect = target
+      this.$emit('select:target', target)
     }
   },
   computed: {
@@ -77,17 +103,54 @@ export default {
     }
   },
   created () {
-    this.obtionStatus = this.requestStatus.FETCHING
     this.findAllProjectByDeveloperId()
   }
 }
 </script>
 <style type="text/css" lang="scss"  scoped>
 .select-location{
-  width: 100%;
+  width: 600px;
   height: 300px;
-  // background-color: bisque;
-  overflow: scroll;
-  padding-left: 8px;
+  background-color: #e4e4e4;
+  overflow: hidden;
+  display: flex;
+  border:1px solid #dcdfe6;
+  border-radius:5px;
+  -moz-border-radius:5px; /* Old Firefox */
+}
+.select-project{
+  width: 50%;
+  overflow-y: scroll;
+}
+.select-folder{
+  width: 50%;
+  overflow-y: scroll;
+  overflow: hidden;
+}
+.wa_project{
+  position: relative;
+  cursor: pointer;
+  border-bottom: 1px solid #dcdfe6;
+  height: 42px;
+  background-color: #ffffff;
+  .test{
+    position: absolute;
+    top: 0px;
+    padding: 15px 10px 15px 6px;
+    i{
+      position: inherit;
+    }
+  }
+  .edit{
+    position: absolute;
+    top: 0px;
+    padding: 13px;
+    right: 0px;
+  }
+  .project_title{
+    position: absolute;
+    top: 0px;
+    padding: 10px 0px 10px 24px;
+  }
 }
 </style>

@@ -22,7 +22,7 @@
   </el-container>
   <el-container v-else>
     <el-aside>
-      <document-side v-bind:pid="currentProject.pid" v-bind:show_modify="false"></document-side>
+      <document-side v-bind:pid="currentProject.pid" v-bind:show_modify="true"></document-side>
     </el-aside>
     <el-main>
       <router-view></router-view>

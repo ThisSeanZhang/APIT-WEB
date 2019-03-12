@@ -25,11 +25,10 @@
 import {ajax} from '../../api/fetch'
 import DeletePopover from './DeletePopover'
 import FolderInfoPanel from './FolderInfoPanel'
-import ModifyProject from './ModifyProject'
 export default {
   name: 'wa-project',
   props: ['project', 'show_modify'],
-  components: {DeletePopover, FolderInfoPanel, ModifyProject},
+  components: {DeletePopover, FolderInfoPanel},
   data () {
     return {
       data: [],

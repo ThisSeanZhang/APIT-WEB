@@ -3,11 +3,20 @@
     <div v-loading="obtionStatus === requestStatus.FETCHING" class="contant">
       <div class="contant_is_empty" v-if="obtionStatus !== requestStatus.SUCCESS">
         <div v-if="obtionStatus === requestStatus.NOTFOUND">
-          空空的诶(●ˇ∀ˇ●)<el-button @click.stop="reflash" type="text">刷新一下</el-button>?
+          空空的诶(●ˇ∀ˇ●)<el-button @click.stop="modifyFolder(null)" type="text">创建</el-button>一个文件夹?
         </div>
         <div v-else-if="obtionStatus === requestStatus.REQUEST_ERROR">
           请求失败了_(:з)∠)_,<el-button @click.stop="reflash" type="text">再试试</el-button>吧
         </div>
+      </div>
+      <div v-else>
+        <el-button
+          class="folder-add-btn"
+          size="mini"
+          icon="el-icon-plus"
+          type="success"
+          @click.stop="modifyFolder(null)"
+          plain>添加文件夹</el-button>
       </div>
       <div>
         <el-tree
@@ -15,33 +24,39 @@
           :class="treeClass"
           lazy
           node-key="nid"
-          :indent = "10"
+          :indent = "5"
           :load="loadFolders"
           :props="nodeProps"
           ref="project_tree"
           @node-click="handleNodeClick">
             <span class="custom-tree-node" slot-scope="{ node, data }">
               <span>{{ node.label }}</span>
-              <span v-if="show_modify">
-                <folder-info-panel v-on:update:list="$emit('update:list')" v-bind:nid="data.nid" v-bind:pid="data.belongProject" v-if="!node.isLeaf" ></folder-info-panel>
-                <delete-popover v-on:confirm:del="() => remove(node, data)" ></delete-popover>
+              <span class="folder-btn">
+                <el-button @click.stop="modifyFolder({pid: data.belongProject, fid: data.contain})" type="text" size="mini" slot="reference">修改</el-button>
+                <!-- <el-button class="delete-text" type="text"  size="mini" slot="reference">删除</el-button> -->
               </span>
             </span>
           </el-tree>
       </div>
     </div>
     <div class="dividing_line"></div>
+    <folder-info-panel
+      v-if="modifyVisible"
+      v-model="modifyVisible"
+      v-on:flash:folders="reflash"
+      v-bind:focus="focus"
+      >
+    </folder-info-panel>
   </div>
 </template>
 <script>
-import ProjectContainer from './ProjectContainer'
 import { ajax, just404 } from '../../api/fetch'
-
+import FolderInfoPanel from './FolderInfoPanel'
 import { createNamespacedHelpers } from 'vuex'
 const { mapState } = createNamespacedHelpers('UserInfo')
-
 export default {
   name: 'document-side',
+  components: {FolderInfoPanel},
   props: {
     show_modify: {
       type: Boolean,
@@ -51,7 +66,6 @@ export default {
       type: Number
     }
   },
-  components: {ProjectContainer},
   data () {
     return {
       nodeProps: {
@@ -61,10 +75,19 @@ export default {
       },
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       obtionStatus: null,
-      showTree: true
+      showTree: true,
+      focus: {
+        pid: null,
+        fid: null
+      },
+      modifyVisible: false
     }
   },
   methods: {
+    modifyFolder (focus) {
+      this.modifyVisible = true
+      this.focus = focus
+    },
     handleNodeClick (data) {
       if (data.leaf) {
         this.$router.push('/projects/' + this.pid + '/apis/' + data.contain)
@@ -154,8 +177,8 @@ export default {
       this.obtionStatus = this.requestStatus.FETCHING
       let request = { method: 'GET', url: 'projects/' + this.pid + '/content/first-layer' }
       ajax(request).then(resp => {
-        this.obtionStatus = this.requestStatus.SUCCESS
         container(resp.data.data)
+        this.obtionStatus = this.requestStatus.SUCCESS
       }).catch(error => {
         just404(error)
           .then(resp => {
@@ -176,8 +199,12 @@ export default {
     ...mapState(['developerId'])
   },
   created () {
-    this.obtionStatus = this.requestStatus.FETCHING
+    // this.obtionStatus = this.requestStatus.FETCHING
+    // this.modifyFolder({pid: 1, fid: 11})
     // this.fetchProjectByPid(this.pid)
+    // this.$refs.aside.oncontextmenu = function (e) {
+    //   return false
+    // }
   }
 }
 </script>
@@ -209,4 +236,48 @@ export default {
     align-items: center;
   }
 }
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
+  .folder-btn{
+    display: none;
+    button {
+      margin: 0px;
+    }
+  }
+}
+.custom-tree-node:hover .folder-btn {
+  display: inline;
+}
+.delete-text{
+  color: #f56c6c;
+}
+.delete-text:hover{
+  color: #f56c6c85;
+}
+.folder-add-btn {
+  margin-top: 2px;
+  width: 100%;
+}
+// .folder-add-btn {
+//   height: 30px;
+//   display: flex;
+//   justify-content: center;
+//   padding: 7px 0px;
+//   border: 1px solid #dcdfe6;
+//   color: #909399;
+//   background: #f4f4f5;
+// }
+// .folder-add-btn:hover {
+//   color: #f4f4f5;
+//   background: #606266;
+// }
+// height: 92%;/*写给不支持calc()的浏览器*/
+  // height:-moz-calc(100% - 60px);
+  // height:-webkit-calc(100% - 60px);
+  // height: calc(100% - 60px);
 </style>
