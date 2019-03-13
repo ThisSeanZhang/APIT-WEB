@@ -15,8 +15,8 @@
         v-for="project in projects"
         :key="project.pid"
         class="wa_project"
-        :style="project.pid === currentSelect.pid ? 'background-color: #e4e4e4;' : ''"
-        @click.stop="emitCurrentChioce({pid: project.pid, fid: null})"
+        :style="project.pid === currentSelect.project.id ? 'background-color: #e4e4e4;' : ''"
+        @click.stop="currentSelect.project = {id: project.pid, name: project.projectName}"
       >
         <span class="project_title">{{project.projectName}}</span>
         <span class="edit" v-if="project.pid === currentSelect.pid">
@@ -27,9 +27,9 @@
     <div class="select-folder">
       <select-folder
         ref="select_folder"
-        v-bind:pid="currentSelect.pid"
+        v-bind:pid="currentSelect.project.id"
         v-bind:show_modify="true"
-        v-on:select:target = "emitCurrentChioce($event)"
+        v-on:select:target = "currentSelect.folder = $event"
       ></select-folder>
     </div>
   </div>
@@ -52,8 +52,14 @@ export default {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       obtionStatus: null,
       currentSelect: {
-        pid: null,
-        fid: null
+        project: {
+          id: null,
+          name: null
+        },
+        folder: {
+          id: null,
+          name: null
+        }
       }
     }
   },
@@ -89,9 +95,8 @@ export default {
         this.obtionStatus = this.requestStatus.REQUEST_ERROR
       }
     },
-    emitCurrentChioce (target) {
+    choiceProject (target) {
       this.currentSelect = target
-      this.$emit('select:target', target)
     }
   },
   computed: {
@@ -100,6 +105,12 @@ export default {
   watch: {
     activeName: function (n, o) {
       this.$emit('select:target', {pid: n === '' ? null : n, fid: null})
+    },
+    currentSelect: {
+      handler: function (n, o) {
+        this.$emit('select:target', n)
+      },
+      deep: true
     }
   },
   created () {

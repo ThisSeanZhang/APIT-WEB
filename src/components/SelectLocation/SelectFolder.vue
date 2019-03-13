@@ -62,7 +62,8 @@ export default {
       }, 1)
     },
     handleNodeClick (data) {
-      this.$emit('select:target', {pid: this.pid, fid: data.contain})
+      console.log(data)
+      this.$emit('select:target', {id: data.contain, name: data.label})
     },
     loadFolders (node, resolve) {
       if (node.level === 0) {

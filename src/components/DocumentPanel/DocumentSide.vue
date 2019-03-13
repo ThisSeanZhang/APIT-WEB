@@ -31,7 +31,7 @@
           @node-click="handleNodeClick">
             <span class="custom-tree-node" slot-scope="{ node, data }">
               <span>{{ node.label }}</span>
-              <span class="folder-btn">
+              <span class="folder-btn" v-if="signed">
                 <el-button @click.stop="modifyFolder({pid: data.belongProject, fid: data.contain})" type="text" size="mini" slot="reference">修改</el-button>
                 <!-- <el-button class="delete-text" type="text"  size="mini" slot="reference">删除</el-button> -->
               </span>
@@ -58,10 +58,6 @@ export default {
   name: 'document-side',
   components: {FolderInfoPanel},
   props: {
-    show_modify: {
-      type: Boolean,
-      default: false
-    },
     pid: {
       type: Number
     }
@@ -196,7 +192,7 @@ export default {
     treeClass: function () {
       return this.obtionStatus !== this.requestStatus.SUCCESS ? 'hidden' : ''
     },
-    ...mapState(['developerId'])
+    ...mapState(['developerId', 'signed'])
   },
   created () {
     // this.obtionStatus = this.requestStatus.FETCHING
