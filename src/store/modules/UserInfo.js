@@ -41,7 +41,8 @@ const actions = {
       email: null,
       defaultProject: null,
       defaultFolder: null,
-      signed: false
+      signed: false,
+      admin: false
     })
   }
 }
