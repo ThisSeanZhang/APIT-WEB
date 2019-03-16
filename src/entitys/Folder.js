@@ -33,6 +33,6 @@ export default class Folder {
     }
   }
   isLegalName () {
-    return folderNamePatten.test(this.folderName)
+    return this.folderName === null ? false : folderNamePatten.test(this.folderName)
   }
 }

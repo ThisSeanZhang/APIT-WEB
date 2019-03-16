@@ -10,7 +10,8 @@
         <el-input v-model="folder.folderName" placeholder="文件夹名称"></el-input>
       </el-form-item>
     </el-form>
-    从下列选择所要放置的文件夹或项目
+    <div v-if="currentSelect.pName === null">从下列选择所要放置的文件夹或项目</div>
+    <div v-else>当前选择的存放位置为: <strong>{{currentSelect.pName}}</strong> 项目下<span v-if="currentSelect.fName !== null">的 <strong>{{currentSelect.fName ? currentSelect.fName : ''}}</strong> 文件夹</span></div>
     <select-location v-if="dialogVisible" v-on:select:target="currentChioceLocation($event)"></select-location>
   </div>
   <span slot="footer" class="dialog-footer">
@@ -69,6 +70,10 @@ export default {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       currentStatus: null,
       delDialogVisible: false,
+      currentSelect: {
+        pName: null,
+        fName: null
+      },
       rules: {
         folderName: [
           { required: true, message: '请输入文件名', trigger: 'blur' },
@@ -89,12 +94,12 @@ export default {
     folderRequest: function () {
       if (this.focus === null) {
         const createFolder = this.folder.parentId
-          ? '/folders/'
+          ? this.folder.parentId + '/sub_folders/'
           : ''
         return {
           request: {
             method: 'POST',
-            url: 'projects/' + this.folder.belongProject + createFolder,
+            url: 'projects/' + this.folder.belongProject + '/folders/' + createFolder,
             data: this.folder
           },
           message: '[]~(￣▽￣)~*添加成功'
@@ -114,15 +119,18 @@ export default {
   },
   methods: {
     currentChioceLocation (target) {
-      this.folder.belongProject = target.pid
-      this.folder.parentId = target.fid
+      this.folder.belongProject = target.project.id
+      this.currentSelect.pName = target.project.name
+      this.folder.parentId = target.folder.id
+      this.currentSelect.fName = target.folder.name
       console.log(target)
     },
     checkAllPass () {
       if (this.folder.belongProject === null) {
-        this.$message.warning('请选择所要移动到的位置')
+        this.$message.warning('请选择所要放置的位置')
         return false
       }
+      console.log('测试过了', this.folder)
       if (!this.folder.isLegalName()) {
         this.$message.warning(Folder.nameValid().message)
         return false

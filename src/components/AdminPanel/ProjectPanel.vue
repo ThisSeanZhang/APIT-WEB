@@ -38,11 +38,11 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            @click="editProject(scope.row.pid)">编辑</el-button>
           <el-button
             size="mini"
             type="danger"
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            @click="$router.push('/projects/' + scope.row.pid)">查看详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -51,34 +51,48 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="filter.page + 1"
-        :page-sizes="[2, 10, 20, 30]"
+        :page-sizes="[10, 20, 30]"
         :page-size="filter.size"
         layout="total, sizes, prev, pager, next, jumper"
         :total="filter.total">
       </el-pagination>
     </div>
   </div>
+  <modify-project
+    v-if="modifyVisible"
+    v-bind:pid="focusPid"
+    v-model="modifyVisible"
+    v-on:flash:projects="fetchProject">
+  </modify-project>
 </div>
 </template>
 <script>
 import { just404 } from '../../api/fetch'
 import Project from '../../entitys/Project'
+import ModifyProject from '../ProjectPanel/ModifyProject'
 export default {
   name: 'project-panel',
+  components: {ModifyProject},
   data () {
     return {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       currentStatus: null,
       projects: null,
       currentSelect: null,
+      modifyVisible: false,
+      focusPid: null,
       filter: {
         page: 0,
-        size: 2,
+        size: 10,
         total: 0
       }
     }
   },
   methods: {
+    editProject (pid) {
+      this.focusPid = pid
+      this.modifyVisible = true
+    },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
       this.filter.size = val

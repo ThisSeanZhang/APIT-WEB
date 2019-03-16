@@ -6,16 +6,16 @@
     v-loading="currentStatus === requestStatus.FETCHING"
   >
     <div class="fetching_fail_not_found" v-if="currentStatus === requestStatus.NOTFOUND">
-      找不到了呢╮（╯＿╰）╭,<el-button @click.stop="fetchProject" type="text">创建</el-button>个项目吧
+      找不到了呢╮（╯＿╰）╭,<el-button @click.stop="fetchDevelopers" type="text">创建</el-button>个项目吧
     </div>
     <div v-else-if="currentStatus === requestStatus.REQUEST_ERROR">
-      请求失败了_(:з)∠)_,<el-button @click.stop="fetchProject" type="text">再试试</el-button>吧
+      请求失败了_(:з)∠)_,<el-button @click.stop="fetchDevelopers" type="text">再试试</el-button>吧
     </div>
   </div>
   <div v-else>
     <el-table
       ref="multipleTable"
-      :data="projects"
+      :data="developers"
       tooltip-effect="dark"
       style="width: 100%"
       @selection-change="handleSelectionChange">
@@ -38,11 +38,7 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            @click="modifyDeveloper(scope.row.developerId)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -51,56 +47,70 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="filter.page + 1"
-        :page-sizes="[1, 10, 20, 30]"
+        :page-sizes="[10, 20, 30]"
         :page-size="filter.size"
         layout="total, sizes, prev, pager, next, jumper"
         :total="filter.total">
       </el-pagination>
     </div>
   </div>
+  <modify-developer
+    v-if="openCreate"
+    v-model="openCreate"
+    v-bind:focus="focusDid"
+    v-on:flash:developers = "fetchDevelopers"></modify-developer>
 </div>
 </template>
 <script>
 import { just404 } from '../../api/fetch'
 import Developer from '../../entitys/Developer'
+import ModifyDeveloper from '../Account/ModifyDeveloper'
 export default {
   name: 'developer-panel',
+  components: {ModifyDeveloper},
   data () {
     return {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       currentStatus: null,
-      projects: null,
+      developers: null,
+      focusDid: null,
+      openCreate: false,
       currentSelect: null,
       filter: {
         page: 0,
-        size: 1,
+        size: 10,
         total: 0
       }
     }
   },
   methods: {
+    modifyDeveloper (did) {
+      this.focusDid = did
+      console.log(did)
+      this.openCreate = true
+    },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
       this.filter.size = val
       this.filter.page = 0
-      this.fetchProject()
+      this.fetchDevelopers()
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
       this.filter.page = val - 1
-      this.fetchProject()
+      this.fetchDevelopers()
     },
     handleSelectionChange (val) {
       this.currentSelect = val
     },
-    fetchProject () {
+    fetchDevelopers () {
       this.currentStatus = this.requestStatus.FETCHING
       Developer.adminFetch(this.filter)
         .then(resp => {
           this.filter.page = resp.data.data.number
           this.filter.size = resp.data.data.size
           this.filter.total = resp.data.data.totalElements
-          this.projects = resp.data.data.content.map(p => new Developer(p))
+          this.developers = resp.data.data.content.map(p => new Developer(p))
           this.currentStatus = this.requestStatus.SUCCESS
         })
         .catch(error => {
@@ -115,7 +125,7 @@ export default {
     }
   },
   created () {
-    this.fetchProject()
+    this.fetchDevelopers()
   },
   activated () {
     console.log('developer Panel')

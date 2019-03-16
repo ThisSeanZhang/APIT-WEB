@@ -39,10 +39,10 @@ export default class Project {
   static nameValid () {
     return {
       patten: projectNamePatten,
-      message: '长度在 4 到 8 个字符,且仅能出现字符\'-_\''
+      message: '文件夹名称长度在 4 到 8 个字符,且仅能出现字符\'-_\''
     }
   }
   isLegalName () {
-    return projectNamePatten.test(this.projectName)
+    return this.projectName === null ? false : projectNamePatten.test(this.projectName)
   }
 }

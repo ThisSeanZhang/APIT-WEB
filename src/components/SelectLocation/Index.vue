@@ -1,22 +1,12 @@
 <template>
   <div class="select-location" v-loading="obtionStatus === requestStatus.FETCHING">
-    <!-- <el-button v-if="projects.length === 0" type="text" @click.stop="findAllProjectByDeveloperId">重新获取</el-button>
-    <el-collapse  v-model="activeName" accordion>
-      <el-collapse-item
-        v-for="project in projects"
-        :key="project.pid"
-        :title="project.projectName"
-        :name="project.pid.toString()">
-        <select-folder v-on:select:folder="emitCurrentChioce(project.pid, $event)" v-if="activeName === project.pid.toString()" v-bind:project="project"></select-folder>
-      </el-collapse-item>
-    </el-collapse> -->
     <div class="select-project">
       <dir
         v-for="project in projects"
         :key="project.pid"
         class="wa_project"
         :style="project.pid === currentSelect.project.id ? 'background-color: #e4e4e4;' : ''"
-        @click.stop="currentSelect.project = {id: project.pid, name: project.projectName}"
+        @click.stop="currentSelect = { project: {id: project.pid, name: project.projectName}, folder: { id: null, name: null } }"
       >
         <span class="project_title">{{project.projectName}}</span>
         <span class="edit" v-if="project.pid === currentSelect.pid">
@@ -70,7 +60,7 @@ export default {
         this.$message.warning('还没有登入欸(●ˇ∀ˇ●)')
         return null
       }
-      let request = {method: 'GET', url: 'projects/owner/' + this.developerId}
+      let request = {method: 'GET', url: 'developers/' + this.developerId + '/projects/'}
       this.obtionStatus = this.requestStatus.FETCHING
       ajax(request).then(resp => {
         this.projects = resp.data.data.map(p => new Project(p))

@@ -3,7 +3,9 @@
     <div v-loading="obtionStatus === requestStatus.FETCHING" class="contant">
       <div class="contant_is_empty" v-if="obtionStatus !== requestStatus.SUCCESS">
         <div v-if="obtionStatus === requestStatus.NOTFOUND">
-          空空的诶(●ˇ∀ˇ●)<el-button @click.stop="modifyFolder(null)" type="text">创建</el-button>一个文件夹?
+          空空的诶(●ˇ∀ˇ●)
+          <el-button v-if="allowEdit" @click.stop="modifyFolder(null)" type="text">创建一个文件夹?</el-button>
+          <el-button v-else @click.stop="$router.push('/index')" type="text">去看看其他项目</el-button>
         </div>
         <div v-else-if="obtionStatus === requestStatus.REQUEST_ERROR">
           请求失败了_(:з)∠)_,<el-button @click.stop="reflash" type="text">再试试</el-button>吧
@@ -11,6 +13,7 @@
       </div>
       <div v-else>
         <el-button
+          v-if="allowEdit"
           class="folder-add-btn"
           size="mini"
           icon="el-icon-plus"
@@ -32,8 +35,11 @@
             <span class="custom-tree-node" slot-scope="{ node, data }">
               <span>{{ node.label }}</span>
               <span class="folder-btn" v-if="signed">
-                <el-button @click.stop="modifyFolder({pid: data.belongProject, fid: data.contain})" type="text" size="mini" slot="reference">修改</el-button>
-                <!-- <el-button class="delete-text" type="text"  size="mini" slot="reference">删除</el-button> -->
+                <el-button
+                  v-if="data.leaf === false && allowEdit"
+                  @click.stop="modifyFolder({pid: data.belongProject, fid: data.contain})"
+                  type="text" size="mini"
+                  slot="reference">修改</el-button>
               </span>
             </span>
           </el-tree>
@@ -60,6 +66,10 @@ export default {
   props: {
     pid: {
       type: Number
+    },
+    whoJoins: {
+      type: String,
+      default: null
     }
   },
   data () {
@@ -88,21 +98,6 @@ export default {
       if (data.leaf) {
         this.$router.push('/projects/' + this.pid + '/apis/' + data.contain)
       }
-      // if (data.leaf) {
-      //   let request = {
-      //     method: 'GET',
-      //     url: 'projects/' + this.pid + '/apis/' + data.contain
-      //   }
-      //   ajax(request).then(resp => {
-      //     // TODO 获取成功后的相应操作
-      //     // console.log(resp.data)
-      //     this.$emit('get:api', resp.data)
-      //   }).catch(error => {
-      //     this.whenErrorMessage(error, () => {
-      //       this.$message.warning('没有东西欸(●ˇ∀ˇ●)')
-      //     })
-      //   })
-      // }
     },
     loadFolders (node, resolve) {
       // console.log(node)
@@ -171,7 +166,7 @@ export default {
     },
     fetchFirstLayer (node, container) {
       this.obtionStatus = this.requestStatus.FETCHING
-      let request = { method: 'GET', url: 'projects/' + this.pid + '/content/first-layer' }
+      let request = { method: 'GET', url: 'projects/' + this.pid + '/content/first_layer' }
       ajax(request).then(resp => {
         container(resp.data.data)
         this.obtionStatus = this.requestStatus.SUCCESS
@@ -192,15 +187,16 @@ export default {
     treeClass: function () {
       return this.obtionStatus !== this.requestStatus.SUCCESS ? 'hidden' : ''
     },
-    ...mapState(['developerId', 'signed'])
+    allowEdit: function () {
+      // 可能会将whoJoins分割了，需要注意下
+      const whoJoins = this.whoJoins.split(',').filter(id => this.developerId === parseInt(id))
+      console.log(whoJoins)
+      console.log(this.whoJoins)
+      return whoJoins.length > 0 || this.admin
+    },
+    ...mapState(['developerId', 'signed', 'admin'])
   },
   created () {
-    // this.obtionStatus = this.requestStatus.FETCHING
-    // this.modifyFolder({pid: 1, fid: 11})
-    // this.fetchProjectByPid(this.pid)
-    // this.$refs.aside.oncontextmenu = function (e) {
-    //   return false
-    // }
   }
 }
 </script>

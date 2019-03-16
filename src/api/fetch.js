@@ -69,9 +69,23 @@ const just404 = function (error) {
     }
   })
 }
+const wantNothing = function (error) {
+  if (error.response) {
+    switch (parseInt(error.response.status)) {
+      case 504:
+        Message.error('发送失败请检查网络连接╮（╯＿╰）╭')
+        break
+      default:
+        Message.warning(error.response.data.message + '(●ˇ∀ˇ●)')
+    }
+  } else {
+    handleNotHTTPError(error, () => {})
+  }
+}
 
 export {
   ajax,
   handleAll,
-  just404
+  just404,
+  wantNothing
 }

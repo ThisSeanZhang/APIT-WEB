@@ -71,7 +71,7 @@ export default {
       } else {
         let request = {
           method: 'GET',
-          url: 'projects/' + this.pid + '/folders/' + node.data.contain + '/content'
+          url: 'projects/' + this.pid + '/folders/' + node.data.contain + '/sub_folders'
         }
         this.getFolders(node, resolve, request)
       }
@@ -92,7 +92,7 @@ export default {
     },
     fetchFirstLayer (node, container) {
       this.obtionStatus = this.requestStatus.FETCHING
-      let request = { method: 'GET', url: 'projects/' + this.pid + '/content/first-layer' }
+      let request = { method: 'GET', url: 'projects/' + this.pid + '/folders/first_layer' }
       ajax(request).then(resp => {
         container(resp.data.data)
         this.obtionStatus = this.requestStatus.SUCCESS

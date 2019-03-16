@@ -13,7 +13,10 @@
       v-loading="currentStatus === requestStatus.FETCHING"
     >
       <div class="fetching_fail_not_found" v-if="currentStatus === requestStatus.NOTFOUND">
-        找不到了呢╮（╯＿╰）╭,<el-button @click.stop="fetchDeveloperProject" type="text">创建</el-button>个项目吧
+        找不到了呢╮（╯＿╰）╭,
+        <el-button v-if="developerId === currentDid" @click.stop="modifyProject(null)" type="text">创建一个</el-button>
+        <el-button v-else @click.stop="$router.push('/index')" type="text">去主页看看</el-button>
+        吧
       </div>
       <div v-else-if="currentStatus === requestStatus.REQUEST_ERROR">
         请求失败了_(:з)∠)_,<el-button @click.stop="fetchDeveloperProject" type="text">再试试</el-button>吧
@@ -22,6 +25,7 @@
     <div class="projects-warp" v-else>
       <div class="project-container">
         <el-card class="project-card"
+          v-if="developerId === currentDid"
           shadow="hover" :body-style="{ padding: '0px' }">
           <div @click.stop="modifyProject(null)" class="card-container">
             <div class="add-project-i">
@@ -33,7 +37,7 @@
           shadow="hover"
           v-for="project in projects" :key="project.pid" :body-style="{ padding: '0px' }">
           <div @click.stop="browseProject(project.pid)" class="card-container">
-            <i v-if="developerId === project.projectOwner" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
+            <i v-if="developerId === project.projectOwner || admin" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
             <div class="card-text">{{project.projectName}}</div>
           </div>
         </el-card>
@@ -68,7 +72,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(['developerId'])
+    ...mapState(['developerId', 'admin']),
+    isOvert: function () {
+      return this.admin || this.developerId === this.currentDid ? '' : '/overt'
+    }
   },
   watch: {
     currentDid: function (nv, ov) {
@@ -80,7 +87,7 @@ export default {
       this.currentStatus = this.requestStatus.FETCHING
       let request = {
         method: 'GET',
-        url: 'developers/' + this.currentDid + '/projects'
+        url: 'developers/' + this.currentDid + '/projects' + this.isOvert
       }
       ajax(request).then(resp => {
         console.log(resp.data.data)

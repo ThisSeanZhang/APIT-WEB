@@ -179,7 +179,7 @@ export default {
       }
       const createRequest = {
         method: 'POST',
-        url: 'projects/',
+        url: 'developers/' + this.developerId + '/projects/',
         data: this.requestProject
       }
       const item = {

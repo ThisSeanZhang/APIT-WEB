@@ -7,9 +7,17 @@
       <div class="doc-api-header">
         <span>{{testRequest.method}}</span>
         {{testRequest.apiName}}
-        <el-tooltip class="item" effect="dark" content="刷新" placement="left">
-          <el-button size="small" style="float: right;" type="info" icon="el-icon-refresh" circle @click.stop="fetchApiInfo()" plain></el-button>
-        </el-tooltip>
+        <div style="float: right;">
+          <el-tooltip class="item" effect="dark" content="删除" placement="top">
+            <el-button size="small" type="danger" icon="el-icon-delete" circle @click.stop="delVisible = true" plain></el-button>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="修改存放位置" placement="top">
+            <el-button size="small" type="primary" icon="el-icon-rank" circle @click.stop="modifyVisible = true" plain></el-button>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="刷新" placement="top">
+            <el-button size="small" type="info" icon="el-icon-refresh" circle @click.stop="fetchApiInfo()" plain></el-button>
+          </el-tooltip>
+        </div>
       </div>
       <div class="doc-api-title">
         API的描述信息
@@ -64,17 +72,40 @@
         </el-table>
       </div>
     </div>
+    <api-location-change
+      v-if="modifyVisible"
+      v-model="modifyVisible"
+      v-on:flash:folders="$router.go(0)"
+      v-bind:focus="{ aid: currentAid, pid: currentPid} "
+    >
+    </api-location-change>
+    <el-dialog
+      center
+      width="210px"
+      title="确定删除？"
+      :visible.sync="delVisible">
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="delVisible = false">取 消</el-button>
+        <el-button
+          type="danger"
+          @click="delApi">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { ajax } from '../../api/fetch'
+import { ajax, wantNothing, just404 } from '../../api/fetch'
 import API from '../../entitys/API'
+import ApiLocationChange from './ApiLocationChange'
 export default {
   name: 'api-page',
+  components: {ApiLocationChange},
   data () {
     return {
       requestStatus: {SUCCESS: 1, NOTFOUND: 2, REQUEST_ERROR: 3, FETCHING: 4},
       currentStatus: null,
+      modifyVisible: false,
+      delVisible: false,
       testRequest: API.newEmptyAPI(),
       currentAid: null,
       currentPid: null
@@ -86,6 +117,19 @@ export default {
     }
   },
   methods: {
+    delApi () {
+      let request = {
+        method: 'DELETE',
+        url: 'projects/' + this.currentPid + '/apis/' + this.currentAid
+      }
+      ajax(request).then(resp => {
+        this.delVisible = false
+        this.$message('[]~(￣▽￣)~*删除成功')
+        this.$router.go(0)
+      }).catch(error => {
+        wantNothing(error)
+      })
+    },
     fetchApiInfo () {
       this.currentStatus = this.requestStatus.FETCHING
       let request = {
@@ -97,11 +141,18 @@ export default {
         this.currentStatus = this.requestStatus.SUCCESS
         this.testRequest = API.convertToAPI(resp.data.data)
       }).catch(error => {
-        this.currentStatus = this.requestStatus.REQUEST_ERROR
-        console.log(error)
-        this.$notify({
-          title: '获取相应的API信息',
-          message: h('i', { style: 'color: #f56c6c' }, '失败了〒▽〒,页面上的信息可能已经失效')
+        just404(error).then(resp => {
+          this.currentStatus = this.requestStatus.NOTFOUND
+          this.$notify({
+            title: '获取相应的API信息',
+            message: h('i', { style: 'color: #f56c6c' }, '〒▽〒找不到相应的API信息了')
+          })
+        }).catch(() => {
+          this.$notify({
+            title: '获取相应的API信息',
+            message: h('i', { style: 'color: #f56c6c' }, '请求失败了〒▽〒,页面上的信息可能已经失效')
+          })
+          this.currentStatus = this.requestStatus.REQUEST_ERROR
         })
         this.testRequest = API.newEmptyAPI()
       })
