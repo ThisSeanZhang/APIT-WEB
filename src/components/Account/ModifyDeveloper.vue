@@ -33,11 +33,6 @@
     </el-form>
   </div>
   <span slot="footer" class="dialog-footer">
-    <el-button
-      type="danger"
-      :disabled="currentStatus === requestStatus.FETCHING"
-      @click="delDialogVisible = true"
-      icon="el-icon-delete" style="float: left;"></el-button>
     <el-button @click="dialogVisible = false">取 消</el-button>
     <el-button
       :disabled="currentStatus === requestStatus.FETCHING"

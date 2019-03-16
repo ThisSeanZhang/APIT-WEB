@@ -1,4 +1,5 @@
 // import { ajax } from '../api/fetch'
+import store from '../store'
 const folderNamePatten = /^[\u4e00-\u9fa5a-zA-Z_\-0-9=]{4,8}$/
 export default class Folder {
   constructor (folder) {
@@ -15,12 +16,12 @@ export default class Folder {
     return new Folder(JSON.parse(str))
   }
 
-  static newEmptyFolder (str) {
+  static newEmptyFolder () {
     return new Folder({
       fid: null,
       folderName: null,
       parentId: null,
-      folderOwnerId: null,
+      folderOwnerId: store.state.UserInfo.developerId ? store.state.UserInfo.developerId : null,
       belongProject: null,
       status: null
     })

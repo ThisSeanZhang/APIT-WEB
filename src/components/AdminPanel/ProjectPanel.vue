@@ -41,7 +41,7 @@
             @click="editProject(scope.row.pid)">编辑</el-button>
           <el-button
             size="mini"
-            type="danger"
+            type="info"
             @click="$router.push('/projects/' + scope.row.pid)">查看详情</el-button>
         </template>
       </el-table-column>
