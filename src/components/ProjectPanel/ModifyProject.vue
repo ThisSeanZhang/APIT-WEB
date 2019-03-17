@@ -2,7 +2,7 @@
   <el-dialog
     :title="pid === null ? '添加项目' : '修改项目'"
     :visible.sync="dialogVisible"
-    width="50%">
+    width="650px">
     <div v-loading="currentStatus === requestStatus.FETCHING">
       <el-form ref="form" label-position="top" :model="project" :rules="rules">
         <el-form-item prop="projectName">
@@ -60,7 +60,7 @@
       </span>
       <el-dialog
         center
-        width="20%"
+        width="210px"
         title="确定删除？"
         :visible.sync="delDialogVisible"
         append-to-body>

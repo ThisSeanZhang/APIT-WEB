@@ -29,7 +29,7 @@
   </span>
   <el-dialog
     center
-    width="20%"
+    width="210px"
     title="确定删除？"
     :visible.sync="delDialogVisible"
     append-to-body>
