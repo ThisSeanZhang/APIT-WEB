@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" v-if="allow">
     <router-view/>
   </div>
 </template>
@@ -10,6 +10,11 @@ import {ajax} from './api/fetch'
 import { mapState, mapActions } from 'vuex'
 export default {
   name: 'App',
+  data () {
+    return {
+      allow: false
+    }
+  },
   // mounted () {
   //   if (localStorage.developerId) {
   //     this.fetchCurrentDeveloperInfo(localStorage.developerId)
@@ -25,6 +30,7 @@ export default {
     ...mapActions('UserInfo', ['setUserInfo', 'delUserInfo']),
     fetchCurrentDeveloperInfo () {
       if (!sessionStorage.developerId) {
+        this.allow = true
         return
       }
       let request = {
@@ -34,16 +40,18 @@ export default {
       ajax(request)
         .then(resp => {
           this.setUserInfo(resp.data.data)
+          this.allow = true
         })
         .catch(error => {
           console.log(error)
           this.$message('登入信息已经过期了,访问非公开信息需要重新登陆哦')
-          this.$notify({
-            title: '状态提示',
-            dangerouslyUseHTMLString: true,
-            message: '<a href="/">点击去登陆</a>'
-          })
+          // this.$notify({
+          //   title: '状态提示',
+          //   dangerouslyUseHTMLString: true,
+          //   message: '<a href="/">点击去登陆</a>'
+          // })
           this.delUserInfo()
+          this.allow = true
         })
     }
   },

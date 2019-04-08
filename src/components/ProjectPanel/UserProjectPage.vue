@@ -37,7 +37,8 @@
           shadow="hover"
           v-for="project in projects" :key="project.pid" :body-style="{ padding: '0px' }">
           <div @click.stop="browseProject(project.pid)" class="card-container">
-            <i v-if="developerId === project.projectOwner || admin" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
+            <!-- <i v-if="developerId === project.projectOwner || admin" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i> -->
+            <i v-if="signed" @click.stop="modifyProject(project.pid)" class="el-icon-setting"></i>
             <div class="card-text">{{project.projectName}}</div>
           </div>
         </el-card>
@@ -72,7 +73,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['developerId', 'admin']),
+    ...mapState(['developerId', 'admin', 'signed']),
     isOvert: function () {
       return this.admin || this.developerId === this.currentDid ? '' : '/overt'
     }
@@ -85,6 +86,7 @@ export default {
   methods: {
     fetchDeveloperProject () {
       this.currentStatus = this.requestStatus.FETCHING
+      console.log('is Overt ', this.admin, this.developerId, this.currentDid, this.isOvert)
       let request = {
         method: 'GET',
         url: 'developers/' + this.currentDid + '/projects' + this.isOvert
