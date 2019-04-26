@@ -8,6 +8,7 @@
     </wa-header>
   </el-header>
   <el-container
+  class="api_container"
     v-loading="currentStatus === requestStatus.FETCHING"
     v-if="currentStatus !== requestStatus.SUCCESS"
     >
@@ -20,7 +21,7 @@
       </div>
     </div>
   </el-container>
-  <el-container v-else>
+  <el-container v-else class="api_container">
     <el-aside>
       <document-side
         v-bind:pid="currentProject.pid"
@@ -130,25 +131,31 @@ export default {
   text-align: center;
   border-bottom: 1px solid #dcdfe6;
 }
-  .el-aside {
-    /* background-color: #D3DCE6; */
-    color: #333;
-    height: 100%;
-    width: auto !important;
+.el-aside {
+  /* background-color: #D3DCE6; */
+  color: #333;
+  height: 100%;
+  width: auto !important;
+}
+.el-main {
+  padding-top: 0px!important;
+}
+.el-container {
+  height: 100%;
+}
+.el-footer{
+  height: 21px !important;
+}
+.loginPanel{
+  border-radius: 5px!important;
+  .loginPanel-body{
+    height: 305px;
   }
-  .el-main {
-    padding-top: 0px!important;
-  }
-  .el-container {
-    height: 100%;
-  }
-  .el-footer{
-    height: 21px !important;
-  }
-  .loginPanel{
-    border-radius: 5px!important;
-    .loginPanel-body{
-      height: 305px;
-    }
-  }
+}
+.api_container {
+  height: 92%;/*写给不支持calc()的浏览器*/
+  height:-moz-calc(100% - 60px);
+  height:-webkit-calc(100% - 60px);
+  height: calc(100% - 60px);
+}
 </style>
