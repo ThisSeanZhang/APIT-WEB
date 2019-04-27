@@ -1,6 +1,6 @@
 {
   "name": "apit-web",
-  "version": "0.0.2-alpha",
+  "version": "0.0.2",
   "description": "IS APIT-Server front",
   "author": "ThisSeanZhang <thisseanzhang@gmail.com>",
   "private": true,
